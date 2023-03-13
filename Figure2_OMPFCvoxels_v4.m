@@ -698,6 +698,41 @@ set(SP, 'box', 'off', 'TickDir','out', 'YTick', [-0.1 0 0.1], 'XTick', [-0.05 0 
 
 
 
+%% Reaction time prediction 
+
+clear peBin_rt binRT 
+nBin = 12; 
+nDD = zeros((length(Rrange)-Bin_size),2); 
+for iSub = 1:21
+    load([session.ID{iSub} '_scanData_processed.mat'], 'paramSFM', 'paramMimic');
+    pe_orig = []; d_orig = []; rt = [];
+    for iS = 1:4
+        paramSFM.track{iS} = Amb2twoAFC(paramSFM.track{iS}); 
+        pe_orig = [pe_orig matSFM{iS,iSub}.result.matPrior];
+        d_orig = [d_orig paramSFM.track{iS}(:,1)'];
+        rt = [rt DataMat.reactionTime.zscore{iSub,iS}'];
+    end
+    
+    for iBin = 1:(length(Rrange)-Bin_size)
+        indCW = ((d_orig == 1) & (pe_orig > Rrange(iBin)) & (pe_orig <= Rrange(iBin+Bin_size))); 
+        indCCW = ((d_orig ~= 1) & (pe_orig > Rrange(iBin)) & (pe_orig <= Rrange(iBin+Bin_size)));
+        peBin_rt(iSub,iBin) = (Rrange(iBin)+Rrange(iBin+Bin_size))/2; 
+        if (sum(indCW)>1)
+            binRT.cw(iSub, iBin) = mean(rt(indCW)); 
+        else
+            binRT.cw(iSub, iBin) = nan; 
+        end
+        if (sum(indCCW)>1)
+            binRT.ccw(iSub, iBin) = mean(rt(indCCW)); 
+        else
+            binRT.ccw(iSub, iBin) = nan; 
+        end
+        binRT.all(iSub, iBin) = mean(rt([indCW + indCCW]==1)); 
+        nDD(iBin,1) = nDD(iBin,1) + sum(indCW); 
+        nDD(iBin,2) = nDD(iBin,2) + sum(indCCW); 
+    end
+end
+
 
 
 
