@@ -1,0 +1,11 @@
+function [Tr_all, Tr_t_all, NtotalTr] = Stack_unsigned(eResult, Tr_all, Tr_t_all, NtotalTr, behavior)
+    % Stack every fragments (this part is for neural data only; sampling frequency is the same)
+	if ~isempty(eResult.stack_TS)
+		Tr_all = [Tr_all; eResult.stack_TS];
+		NtotalTr = length(eResult.stack_TS(:,1)) + NtotalTr;
+    end
+    
+    if (behavior == 1) & isempty(Tr_t_all)
+		Tr_t_all = [Tr_t_all; eResult.stack_TS_t];
+    end
+end

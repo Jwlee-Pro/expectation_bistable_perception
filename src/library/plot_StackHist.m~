@@ -1,0 +1,19 @@
+function temp = plot_StackHist(DataSet1, DataSet2, Color1, Color2); 
+
+DataHist = [CorrelationMat_cal{2,1} CorrelationMat_cal{2,3}]; 
+minHist = min(DataHist); maxHist = max(DataHist); 
+BinRange = linspace(minHist, maxHist, 50); 
+% center 
+for iB = 1:length(BinRange)-1
+    BinCenter(iB) = (BinRange(iB)+BinRange(iB+1))/2; 
+end
+BinCenter_sided = [(2*BinCenter(1) - (BinCenter(2))) BinCenter (2*BinCenter(end) - (BinCenter(end-1)))];
+
+figure(100); 
+
+hInfo = histogram(CorrelationMat_cal{2,2},BinRange); 
+temp.BinVal_1 = hInfo.Values; 
+hInfo = histogram(CorrelationMat_cal{2,3},BinRange); 
+temp.BinVal_2 = hInfo.Values; 
+temp.BinCenter = BinCenter; 
+

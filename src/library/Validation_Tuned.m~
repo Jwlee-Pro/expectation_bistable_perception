@@ -1,0 +1,115 @@
+function [Performance_all, AUC_all] = Validation_Tuned(TS1, paramX, Performance_all, AUC_all, iSub, iROI) 
+
+    % TS1 = Tuned signal 
+    TS_all = []; 
+    for iSess = 1:paramX.nSession
+        TS_all = [TS_all TS1{iSess}];
+    end
+    % Evaluate score
+    TR = 2.4; 
+    HemodynamicDelay = TR ; % delay will be applied like TR*Hemodynamic Delay
+
+%     TS_bold_tuned = []; 
+%     for iSess = 1:paramX.nSession
+%         TS_bold_tuned = [TS_bold_tuned ((TS1{iSess}((1+HemodynamicDelay):end) > 0)-0.5)*2]; 
+%     end
+    
+    time_fMRI = (TR:TR:TR*(125));
+    TS_behavior = [];
+    TS_BOLD = [];
+    for iSess = 1:paramX.nSession
+        
+        % Behavioral part (truth)
+            strInd = find(paramX.track{iSess}(:,2) == 0);
+            if ~isempty(strInd)
+                for iSt = 1:length(strInd)
+                    paramX.track{iSess}(strInd(iSt),2) = paramX.track{iSess}(strInd(iSt)-1,2) + paramX.tBlank + paramX.tDisplay; 
+                end
+            end
+        
+        
+            TS2_f1 = Amb2twoAFC(paramX.track{iSess}); 
+            TS2_f1(find(TS2_f1(:,1) == -1),1) = 0; 
+            truth = TS2_f1(:,1); 
+            truth_time = TS2_f1(:,2);
+            minT = min(truth_time + HemodynamicDelay); maxT = max(truth_time + HemodynamicDelay); 
+            minT_fMRI = find(time_fMRI > minT,1,'first'); maxT_fMRI = find(time_fMRI < maxT, 1, 'last');
+            % Undersample this (since trial length < sampling period) 
+            truth_BOLD = round(interp1(truth_time + HemodynamicDelay, truth, time_fMRI(minT_fMRI:maxT_fMRI)));
+            truth_BOLD(find(truth_BOLD == 0)) = -1;
+        
+        % Tuned part (decoded)
+            tempScore = (TS1{iSess} > 0).*1 ;
+            tempScore(find(tempScore == 0)) = -1;
+            Score = tempScore(minT_fMRI:maxT_fMRI); 
+        
+
+        % Stack
+        TS_BOLD = [TS_BOLD Score]; 
+        TS_behavior = [TS_behavior truth_BOLD]; 
+        
+%         TS_behavior_tuned = [TS_behavior_tuned (((interp1(TS2_f1{iSess}(:,2), TS2_f1{iSess}(:,1), time_fMRI(1:end-HemodynamicDelay))) > 0)-0.5)*2]; 
+    end
+        
+    
+    
+    % Calculating performance 
+    Performance_all{iROI, iSub} = 100*sum(TS_BOLD == TS_behavior)/length(TS_BOLD); 
+
+    
+    
+        FPR = 0 ; 
+        TPR = 0 ;
+        AUC = 0 ; 
+        CritSet = min(TS_all):(max(TS_all)-min(TS_all))/100:max(TS_all);
+        a_all = []; 
+        b_all = []; 
+                    for iC = 1:length(CritSet)      
+
+        for iSess = 1:paramX.nSession
+                tempScore = (TS1{iSess} > CritSet(iC)).*1 ;
+                tempScore(find(tempScore == 0)) = -1;
+
+                TS2_f1 = Amb2twoAFC(paramX.track{iSess});  
+                TS2_f1(find(TS2_f1(:,1) == -1),1) = 0; 
+
+                truth = TS2_f1(:,1); 
+                truth_time = TS2_f1(:,2); 
+
+                time_fMRI = (TR:TR:TR*(125));
+                minT = min(truth_time + HemodynamicDelay); maxT = max(truth_time + HemodynamicDelay); 
+                minT_fMRI = find(time_fMRI > minT,1,'first'); maxT_fMRI = find(time_fMRI < maxT, 1, 'last');
+                % Undersample this (since trial length < sampling period) 
+                truth_replay = round(interp1(truth_time + HemodynamicDelay, truth, time_fMRI(minT_fMRI:maxT_fMRI))); 
+                truth_replay(find(truth_replay == 0)) = -1;
+
+                a_all = [a_all truth_replay] ; 
+                % Compare with decoded value and real value 
+                Score_replay = tempScore(minT_fMRI:maxT_fMRI); 
+                b_all = [b_all Score_replay] ; 
+
+            end
+            
+            
+            TP = sum((b_all == 1).*(a_all == 1)); 
+            FN = sum((b_all == -1).*(a_all == 1)); 
+            FP = sum((b_all == 1).*(a_all == -1));
+            TN = sum((b_all == -1).*(a_all == -1)); 
+
+            FPR(iC) = FP/(FP+TN); 
+            TPR(iC) = TP/(TP+FN);
+                
+        end
+        for iL = 1:length(FPR)-1
+            AUC = AUC + (-FPR(iL+1)+FPR(iL))*TPR(iL); 
+        end
+        AUC_all{iROI, iSub} = AUC;
+
+        
+    
+    end
+
+
+
+
+
