@@ -1,12 +1,17 @@
+%% Behavioral analysis & figure drawing
+
+% Figure 2
+% Correspondence of observed behavior and model
+
+clear all; close all; clc; 
 
 
-clear all; 
-
-addpath('/Users/joonwon/Desktop/Matlab_local/draw_SPLITaxis'); 
-addpath('/Volumes/Data_CSNL/people/JWL/Projects(workspace)/Structure-from-motion/SfM_FinalAnalysis_version/BayesianSampling/library'); 
-addpath('/Volumes/Data_CSNL/people/JWL/Projects(workspace)/Structure-from-motion/SfM_FinalAnalysis_version/Exp1_BOLD analysis/Behavior'); 
-addpath('/Volumes/Data_CSNL/people/JWL/Projects(workspace)/Structure-from-motion/SfM_FinalAnalysis_version/Code Library');
-load('/Volumes/Data_CSNL/people/JWL/Projects(workspace)/Structure-from-motion/Paper Writing/LeeEtal_ManuSfM/2018_Mf_Oct/Analysis_simulation/SimulationResult_BistablePeak_alpha_5_SR_27_DispSig_3', 'simParam') 
+%% Parameters 
+simParam.disparitySig = [0.4000 0.8000 1 1.3000 1.6000 2];
+simParam.sampleSet = 1:50; 
+simParam.nTrials = 200; 
+simParam.nSession = 4000; 
+simParam.alpha = 0.49:0.02:0.99; 
 
 
 analysis_param.nSimPsession = 4; 
@@ -14,6 +19,25 @@ analysis_param.tFrag = 60;
 analysis_param.ShareFrag = linspace(0,analysis_param.tFrag,analysis_param.tFrag*2);
 analysis_param.xT = 1:0.2:300; 
 
+% Necessary library 
+addpath('./library'); 
+addpath('../data/behavior'); 
+
+cmap_c=[102 204 255;204 204 204; 255 204 102]./255;
+cmap_simul = [0.5 0 0]; 
+cmap_repSub = [170 88 71]/255; 
+
+
+% Loading general informations (cmap, session.ID)
+ParamSetting_merge_fmri_pupil; 
+
+
+idSub_rep = 8; 
+
+
+
+
+%% Load simulated results (data not included in github repo.)
 merge_do = 0; 
 
 if merge_do == 1
@@ -51,25 +75,6 @@ end
 
 
 
-%% Quantify observed behavioral dynamics 
-
-addpath('./library'); 
-addpath('./Code Library');
-addpath('/Volumes/Data_CSNL/people/JWL/Projects(workspace)/Structure-from-motion/SfM_FinalAnalysis_version/Exp1_BOLD analysis/Behavior'); 
-addpath('/Volumes/Data_CSNL/people/JWL/Projects(workspace)/Structure-from-motion/SfM_FinalAnalysis_version/Exp2_Pupil analysis/Behavior'); 
-
-cmap_c=[102 204 255;204 204 204; 255 204 102]./255;
-cmap_simul = [0.5 0 0]; 
-cmap_repSub = [170 88 71]/255; 
-
-
-% Loading general informations (cmap, session.ID)
-ParamSetting_merge_fmri_pupil; 
-simLocation = '/Volumes/Data_CSNL/people/JWL/Projects(workspace)/Structure-from-motion/SfM_FinalAnalysis_version/BayesianSampling/SimulationResult_3D/'; 
-
-
-idSub_rep = 8; 
-
 %% Merging different sessions
 clear beh_SFM beh_SFM_trialLength
 ipupilSess = 12; 
@@ -98,11 +103,10 @@ for iSub = 1:nSubject
                 beh_SFM{iSub} = [beh_SFM{iSub} paramSFM.track];
                 beh_SFM_trialLength{iSub}(iSess) = paramSFM.tDisplay + paramSFM.tBlank;
             catch
-                fprintf(['iSub = ' num2str(iSub) ', Sess =' num2str(iSess) '\n']); 
+                fprintf(['missing sessions, iSub = ' num2str(iSub) ', Sess =' num2str(iSess) '\n']); 
             end
         end
     end
-
 end
 
 
@@ -179,12 +183,8 @@ for iDsp = 1:3
     end
 end
 
-% % Rule out too small sampling rates 
-% for iSub = 1:nSubject
-%     errorMerge_ind{iSub}(:,:,1:6) = nan;
-% end
 
-
+% Find best parameter sets 
 clear DataFit; 
 for iType = ExType
     % Free = 3 
@@ -240,127 +240,19 @@ for iType = ExType
     end
 end
 
-
-
-set(figure(1),'position',[62 611 943 194]); clf; 
-for iDsp = 1:3 
-    SP = subplot(1,3,iDsp); hold on; 
-    imagesc(simParam.sampleSet, simParam.alpha, squeeze(simProcess_merge.avgDom(iDsp,:,:)), 'AlphaData',~isnan(squeeze(simProcess_merge.avgDom(iDsp,:,:)))); colorbar;
-    set(SP,'ydir','normal');
-    xlabel('Sampling rate (\lambda)');  ylabel('Adapting rate (\alpha)'); 
-    xlim([0.5 50]); ylim([0.48 1]); colorbar;
-end
-
-set(figure(1),'position',[1 732 474 166]); clf; 
-% alpha 
-SP = subplot(1,2,1); cla; hold on; 
-plot(simParam.alpha([DataFit.param_2dim_1(:,2) DataFit.param_2dim_2(:,2) DataFit.param_2dim_3(:,2)])','marker','.','markersize',7); 
-xlabel('\sigma _m');  ylabel('Fitted \alpha'); 
-xlim([0.5 3.5]); 
-set(SP, 'box', 'off', 'TickDir', 'out', 'XTick', [1 2 3], 'Xticklabel',{'0.4','0.8','1'},'FontSize', 10,'color','none');
-
-SP = subplot(1,2,2); cla; hold on; 
-plot([DataFit.param_2dim_1(:,3) DataFit.param_2dim_2(:,3) DataFit.param_2dim_3(:,3)]','marker','.','markersize',7); 
-xlabel('\sigma _m');  ylabel('Fitted \lambda'); 
-xlim([0.5 3.5]); 
-set(SP, 'box', 'off', 'TickDir', 'out', 'XTick', [1 2 3], 'Xticklabel',{'0.4','0.8','1'},'FontSize', 10,'color','none');
-
-set(figure(5),'position',[62 611 943 194]); clf; 
-for iDsp = 1:3 
-    SP = subplot(1,3,iDsp); hold on; 
-    imagesc(simParam.sampleSet, simParam.alpha, squeeze(errorMerge_ind{4}(iDsp,:,:)), 'AlphaData',~isnan(squeeze(errorMerge_ind{4}(iDsp,:,:)))); colorbar;
-    set(SP,'ydir','normal');
-    xlabel('Sampling rate (\lambda)');  ylabel('Adapting rate (\alpha)'); 
-    xlim([0.5 50]); ylim([0.48 1]); colorbar;
-    caxis([0 1]); 
-end
-
-
-
-reviseduptohere
-
-
-
-
 %%
 
-
-set(figure(2),'position',[62 611 943 194]); clf; 
-for iDsp = 1:3 
-    SP = subplot(1,3,iDsp); hold on; 
-    imagesc(simParam.sampleSet, simParam.alpha, squeeze(simProcess_merge.avgDom(iDsp,:,:)), 'AlphaData',~isnan(squeeze(simProcess_merge.avgDom(iDsp,:,:)))); colorbar;
-    set(SP,'ydir','normal');
-    xlabel('Sampling rate (\lambda)');  ylabel('Adapting rate (\alpha)'); 
-    xlim([0.5 50]); ylim([0.48 1]); colorbar;
-end
-
-set(figure(1),'position',[1 732 474 166]); clf; 
-% alpha 
-SP = subplot(1,2,1); cla; hold on; 
-plot(simParam.alpha([DataFit.param_2dim_1(:,2) DataFit.param_2dim_2(:,2) DataFit.param_2dim_3(:,2)])','marker','.','markersize',7); 
-xlabel('\sigma _m');  ylabel('Fitted \alpha'); 
-xlim([0.5 3.5]); 
-set(SP, 'box', 'off', 'TickDir', 'out', 'XTick', [1 2 3], 'Xticklabel',{'0.4','0.8','1'},'FontSize', 10,'color','none');
-
-SP = subplot(1,2,2); cla; hold on; 
-plot([DataFit.param_2dim_1(:,3) DataFit.param_2dim_2(:,3) DataFit.param_2dim_3(:,3)]','marker','.','markersize',7); 
-xlabel('\sigma _m');  ylabel('Fitted \lambda'); 
-xlim([0.5 3.5]); 
-set(SP, 'box', 'off', 'TickDir', 'out', 'XTick', [1 2 3], 'Xticklabel',{'0.4','0.8','1'},'FontSize', 10,'color','none');
-
-set(figure(5),'position',[62 611 943 194]); clf; 
-for iDsp = 1:3 
-    SP = subplot(1,3,iDsp); hold on; 
-    imagesc(simParam.sampleSet, simParam.alpha, squeeze(errorMerge_ind{4}(iDsp,:,:)), 'AlphaData',~isnan(squeeze(errorMerge_ind{4}(iDsp,:,:)))); colorbar;
-    set(SP,'ydir','normal');
-    xlabel('Sampling rate (\lambda)');  ylabel('Adapting rate (\alpha)'); 
-    xlim([0.5 50]); ylim([0.48 1]); colorbar;
-    caxis([0 1]); 
-end
-
-
-cd('/Volumes/Data_CSNL/people/JWL/Projects(workspace)/Structure-from-motion/Paper Writing/LeeEtal_ManuSfM/2018_Mf_Oct/Analysis_behavior'); 
-save('paramFitted_3dim.mat','simParam','DataFit'); 
-
-
-
-for iSub = 1:nSubject
-    valInd = DataFit.param_3dim(iSub,:); 
-    errVal(iSub,3) = errorMerge_ind{iSub}(valInd(1), valInd(2), valInd(3)); 
-    
-    valInd = DataFit.param_2dim(iSub,:); 
-    errVal(iSub,2) = errorMerge_ind{iSub}(valInd(1), valInd(2), valInd(3)); 
-
-    valInd = DataFit.param_1dim(iSub,:); 
-    errVal(iSub,1) = errorMerge_ind{iSub}(valInd(1), valInd(2), valInd(3)); 
-end
-
-set(figure(6),'position',[62 600 187 205]) ; clf; SP = subplot(1,1,1); hold on;  
-errorbar(1:3, mean(errVal), std(errVal)/sqrt(20),'ko','markerfacecolor','w'); 
-xlim([0.8 3.2]); 
-xlabel('Number of free parameters');  ylabel({'Hellinger distance of','best-fitting parameter'}); 
-set(SP, 'box', 'off', 'TickDir', 'out', 'XTick', [1 2 3],'FontSize', 10,'color','none');
-
-
-
-
-
-
-
-% Figure parameters 
-FigureNumber = 7; 
 Fig_size_cm{1} = [9 8]; 
 Common_fontsize = 8;
 Common_markersize = 9.5; 
 
-% Figure drawing 
 BackgroundColor = [0 0 0]+1;
 % BackgroundColor = [0 0 0]+1;
 Fig_size_px{1} =round(cm2pixel(Fig_size_cm{1})); 
-set(figure(FigureNumber), 'Position', [100 100 724 681]); clf;
-set(gcf,'Color',[0 0 0]+1); 
+
 load('cmap_forFig2IndividualDiff_mild','cmap_ind'); 
 [avgDom_sorted, IndSorted] = sort(DataBehav.avgDom); 
+
 
 
 
@@ -379,95 +271,6 @@ for iSub = 1:21
     
 end
 BackgroundColor = 'w'; 
-
-
-for iSub = 1:21
-    cmap_ind_sort(IndSorted(iSub),:) = cmap_ind(iSub,:); 
-end
-
-SP=subplot('Position', [0.08   0.7    0.13    0.14]); cla; hold on;
-for iSub = 1:21 
-    plot(BehPo.mean(iSub), SimPo.mean_1dim(iSub),'ko','markerfacecolor',cmap_ind_sort(iSub,:),'markeredgecolor','none','markersize',4);
-end
-line([3 150], [3 150],'linestyle','--','color','k'); 
-set(gca,'XScale','log','YScale','log');
-ylim([3 150]); xlim([3 150]); 
-xlabel('Observed'); 
-ylabel('Simulated'); 
-title('Mean, \kappa\theta (s)','fontweight','bold');
-set(SP, 'box', 'off', 'TickDir', 'out', 'XTick', [3 10 100], 'YTick', [3 10 100], 'FontSize', Common_fontsize);
-set(gca,'color',BackgroundColor);
-
-
-SP=subplot('Position', [0.29    0.7    0.13    0.14]); cla; hold on;
-for iSub = 1:21 
-    plot(BehPo.std(iSub), SimPo.std_1dim(iSub),'ko','markerfacecolor',cmap_ind_sort(iSub,:),'markeredgecolor','none','markersize',4);
-end
-line([10 100000], [10 100000],'linestyle','--','color','k'); 
-ylim([10 100000]); xlim([10 100000]); 
-set(gca,'XScale','log','YScale','log');
-xlabel('Observed'); 
-ylabel('Simulated'); 
-title('Variance, \kappa\theta^2 (s)','fontweight','bold');
-set(SP, 'box', 'off', 'TickDir', 'out', 'XTick', [10 100000], 'YTick', [10 100000], 'FontSize', Common_fontsize);
-set(gca,'color',BackgroundColor); 
-
-SP=subplot('Position', [0.08   0.45    0.13    0.14]); cla; hold on;
-for iSub = 1:21 
-    plot(BehPo.mean(iSub), SimPo.mean_2dim(iSub),'ko','markerfacecolor',cmap_ind_sort(iSub,:),'markeredgecolor','none','markersize',4);
-end
-line([3 150], [3 150],'linestyle','--','color','k'); 
-set(gca,'XScale','log','YScale','log');
-ylim([3 150]); xlim([3 150]); 
-xlabel('Observed'); 
-ylabel('Simulated'); 
-title('Mean, \kappa\theta (s)','fontweight','bold');
-set(SP, 'box', 'off', 'TickDir', 'out', 'XTick', [3 10 100], 'YTick', [3 10 100], 'FontSize', Common_fontsize);
-set(gca,'color',BackgroundColor);
-
-
-SP=subplot('Position', [0.29    0.45    0.13    0.14]); cla; hold on;
-for iSub = 1:21 
-    plot(BehPo.std(iSub), SimPo.std_2dim(iSub),'ko','markerfacecolor',cmap_ind_sort(iSub,:),'markeredgecolor','none','markersize',4);
-end
-line([10 100000], [10 100000],'linestyle','--','color','k'); 
-ylim([10 100000]); xlim([10 100000]); 
-set(gca,'XScale','log','YScale','log');
-xlabel('Observed'); 
-ylabel('Simulated'); 
-title('Variance, \kappa\theta^2 (s)','fontweight','bold');
-set(SP, 'box', 'off', 'TickDir', 'out', 'XTick', [10 100000], 'YTick', [10 100000], 'FontSize', Common_fontsize);
-set(gca,'color',BackgroundColor); 
-
-
-SP=subplot('Position', [0.08   0.2    0.13    0.14]); cla; hold on;
-for iSub = 1:21 
-    plot(BehPo.mean(iSub), SimPo.mean_3dim(iSub),'ko','markerfacecolor',cmap_ind_sort(iSub,:),'markeredgecolor','none','markersize',4);
-end
-line([3 150], [3 150],'linestyle','--','color','k'); 
-set(gca,'XScale','log','YScale','log');
-ylim([3 150]); xlim([3 150]); 
-xlabel('Observed'); 
-ylabel('Simulated'); 
-title('Mean, \kappa\theta (s)','fontweight','bold');
-set(SP, 'box', 'off', 'TickDir', 'out', 'XTick', [3 10 100], 'YTick', [3 10 100], 'FontSize', Common_fontsize);
-set(gca,'color',BackgroundColor);
-
-
-SP=subplot('Position', [0.29    0.2    0.13    0.14]); cla; hold on;
-for iSub = 1:21 
-    plot(BehPo.std(iSub), SimPo.std_3dim(iSub),'ko','markerfacecolor',cmap_ind_sort(iSub,:),'markeredgecolor','none','markersize',4);
-end
-line([10 100000], [10 100000],'linestyle','--','color','k'); 
-ylim([10 100000]); xlim([10 100000]); 
-set(gca,'XScale','log','YScale','log');
-xlabel('Observed'); 
-ylabel('Simulated'); 
-title('Variance, \kappa\theta^2 (s)','fontweight','bold');
-set(SP, 'box', 'off', 'TickDir', 'out', 'XTick', [10 100000], 'YTick', [10 100000], 'FontSize', Common_fontsize);
-set(gca,'color',BackgroundColor); 
-
-
 
 
 % Fit exponential functions
@@ -547,114 +350,9 @@ for iSub = 1:21
 end
 
 
-SP=subplot('Position', [0.29+0.21    0.7    0.13    0.14]); cla; hold on;
-for iSub = 1:21 
-    plot(BehPo.SR(iSub), SimPo.SR_1dim(iSub),'ko','markerfacecolor',cmap_ind_sort(iSub,:),'markeredgecolor','none','markersize',4);
-end
-line([0.001 1], [0.001 1],'linestyle','--','color','k'); 
-ylim([0.001 1]); xlim([0.001 1]); 
-set(gca,'XScale','log','YScale','log');
-xlabel('Observed'); 
-ylabel('Simulated'); 
-title('\tau_S (s)','fontweight','bold');
-XTick = [0.001 0.01 0.1 1];
-TickLabels{1} = '10^-^3'; TickLabels{2} = '10^-^2'; TickLabels{3} = '10^-^1'; TickLabels{4} = '1';
-% set(SP, 'box', 'off', 'TickDir', 'out', 'XTick', [0.001 0.01 0.1 0.5], 'YTick', [0.001 0.01 0.1 0.5], 'FontSize', Common_fontsize);
-set(SP, 'box', 'off', 'TickDir', 'out', 'XTick', [0.001 0.01 0.1 1],'Xticklabel',TickLabels,'Yticklabel',TickLabels, 'YTick', [0.001 0.01 0.1 1], 'FontSize', Common_fontsize);
-set(gca,'color',BackgroundColor); 
-
-% [a1,a2] = corr(BehPo.cTR',SimPo.cTR')
-
-
-SP=subplot('Position', [0.29+0.42    0.7    0.13    0.14]); cla; hold on;
-for iSub = 1:21 
-    plot(BehPo.cTR(iSub), SimPo.cTR_1dim(iSub),'ko','markerfacecolor',cmap_ind_sort(iSub,:),'markeredgecolor','none','markersize',4);
-end
-line([0.001 1], [0.001 1],'linestyle','--','color','k'); 
-ylim([0.001 1]); xlim([0.001 1]); 
-set(gca,'XScale','log','YScale','log');
-xlabel('Observed'); ylabel('Simulated'); 
-title('\tau_T (s)','fontweight','bold');
-set(SP, 'box', 'off', 'TickDir', 'out', 'XTick', [0.001 0.01 0.1 1],'Xticklabel',TickLabels,'Yticklabel',TickLabels, 'YTick', [0.001 0.01 0.1 1], 'FontSize', Common_fontsize);
-set(gcf,'color','w'); 
-
-
-SP=subplot('Position', [0.29+0.21    0.45    0.13    0.14]); cla; hold on;
-for iSub = 1:21 
-    plot(BehPo.SR(iSub), SimPo.SR_2dim(iSub),'ko','markerfacecolor',cmap_ind_sort(iSub,:),'markeredgecolor','none','markersize',4);
-end
-line([0.001 1], [0.001 1],'linestyle','--','color','k'); 
-ylim([0.001 1]); xlim([0.001 1]); 
-set(gca,'XScale','log','YScale','log');
-xlabel('Observed'); 
-ylabel('Simulated'); 
-title('\tau_S (s)','fontweight','bold');
-XTick = [0.001 0.01 0.1 1];
-TickLabels{1} = '10^-^3'; TickLabels{2} = '10^-^2'; TickLabels{3} = '10^-^1'; TickLabels{4} = '1';
-% set(SP, 'box', 'off', 'TickDir', 'out', 'XTick', [0.001 0.01 0.1 0.5], 'YTick', [0.001 0.01 0.1 0.5], 'FontSize', Common_fontsize);
-set(SP, 'box', 'off', 'TickDir', 'out', 'XTick', [0.001 0.01 0.1 1],'Xticklabel',TickLabels,'Yticklabel',TickLabels, 'YTick', [0.001 0.01 0.1 1], 'FontSize', Common_fontsize);
-set(gca,'color',BackgroundColor); 
-
-% [a1,a2] = corr(BehPo.cTR',SimPo.cTR')
-
-
-SP=subplot('Position', [0.29+0.42    0.45    0.13    0.14]); cla; hold on;
-for iSub = 1:21 
-    plot(BehPo.cTR(iSub), SimPo.cTR_2dim(iSub),'ko','markerfacecolor',cmap_ind_sort(iSub,:),'markeredgecolor','none','markersize',4);
-end
-line([0.001 1], [0.001 1],'linestyle','--','color','k'); 
-ylim([0.001 1]); xlim([0.001 1]); 
-set(gca,'XScale','log','YScale','log');
-xlabel('Observed'); ylabel('Simulated'); 
-title('\tau_T (s)','fontweight','bold');
-set(SP, 'box', 'off', 'TickDir', 'out', 'XTick', [0.001 0.01 0.1 1],'Xticklabel',TickLabels,'Yticklabel',TickLabels, 'YTick', [0.001 0.01 0.1 1], 'FontSize', Common_fontsize);
-set(gcf,'color','w'); 
 
 
 
-
-SP=subplot('Position', [0.29+0.21    0.2    0.13    0.14]); cla; hold on;
-for iSub = 1:21 
-    plot(BehPo.SR(iSub), SimPo.SR_3dim(iSub),'ko','markerfacecolor',cmap_ind_sort(iSub,:),'markeredgecolor','none','markersize',4);
-end
-line([0.001 1], [0.001 1],'linestyle','--','color','k'); 
-ylim([0.001 1]); xlim([0.001 1]); 
-set(gca,'XScale','log','YScale','log');
-xlabel('Observed'); 
-ylabel('Simulated'); 
-title('\tau_S (s)','fontweight','bold');
-XTick = [0.001 0.01 0.1 1];
-TickLabels{1} = '10^-^3'; TickLabels{2} = '10^-^2'; TickLabels{3} = '10^-^1'; TickLabels{4} = '1';
-% set(SP, 'box', 'off', 'TickDir', 'out', 'XTick', [0.001 0.01 0.1 0.5], 'YTick', [0.001 0.01 0.1 0.5], 'FontSize', Common_fontsize);
-set(SP, 'box', 'off', 'TickDir', 'out', 'XTick', [0.001 0.01 0.1 1],'Xticklabel',TickLabels,'Yticklabel',TickLabels, 'YTick', [0.001 0.01 0.1 1], 'FontSize', Common_fontsize);
-set(gca,'color',BackgroundColor); 
-
-% [a1,a2] = corr(BehPo.cTR',SimPo.cTR')
-
-
-SP=subplot('Position', [0.29+0.42    0.2    0.13    0.14]); cla; hold on;
-for iSub = 1:21 
-    plot(BehPo.cTR(iSub), SimPo.cTR_3dim(iSub),'ko','markerfacecolor',cmap_ind_sort(iSub,:),'markeredgecolor','none','markersize',4);
-end
-line([0.001 1], [0.001 1],'linestyle','--','color','k'); 
-ylim([0.001 1]); xlim([0.001 1]); 
-set(gca,'XScale','log','YScale','log');
-xlabel('Observed'); ylabel('Simulated'); 
-title('\tau_T (s)','fontweight','bold');
-set(SP, 'box', 'off', 'TickDir', 'out', 'XTick', [0.001 0.01 0.1 1],'Xticklabel',TickLabels,'Yticklabel',TickLabels, 'YTick', [0.001 0.01 0.1 1], 'FontSize', Common_fontsize);
-set(gcf,'color','w'); 
-
-
-
-[a1,~] = corr(BehPo.std',SimPo.std_1dim')
-[a1,~] = corr(BehPo.std',SimPo.std_2dim')
-[a1,~] = corr(BehPo.std',SimPo.std_3dim')
-
-
-
-
-
-%% Figure (final) 
 %% [Fig2.b] 
 set(figure(1000),'position',[100 221 574 560]); 
 
@@ -834,7 +532,7 @@ set(gca,'color',BackgroundColor);
 
 
 
-[a1,a2] = corr(BehPo.std',SimPo.std')
+% [a1,a2] = corr(BehPo.std',SimPo.std')
 
 SP=subplot('Position', [0.35+0.21    0.2695    0.13    0.14]); cla; hold on;
 for iSub = 1:nSubject 
