@@ -584,26 +584,9 @@ save_figureToPDF(FigHandle, 'Figure2_BehaviorDynamics');
 load('/Volumes/Data_CSNL/people/JWL/Projects(workspace)/Structure-from-motion/Paper Writing/LeeEtal_ManuSfM/2017_M7/Data_allTS_15.mat'); 
 load('/Volumes/Data_CSNL/people/JWL/Projects(workspace)/Structure-from-motion/Paper Writing/LeeEtal_ManuSfM/2017_M7/MTanalysis_deep/LeeLee_PriorEffect_workspace_PredCo20171127.mat','matSFM','matMimic','matSFM_PredCo'); 
 
-Bin_size = 20;
-Bin_dt = 0.01;
-peall = []; 
-for iSub = 1:21
-    for iS = 1:length(matSFM(:,iSub))
-        peall = [peall matSFM{iS,iSub}.result.matPrior];
-    end
-end
-minPE = min(abs(peall)); 
-maxPE = max(abs(peall)); 
-Rrange = minPE:Bin_dt:maxPE; 
-
-
-clear peBin_rt binRT coefval
+clear peBin_rt binRT 
 nBin = 12; 
 nDD = zeros((length(Rrange)-Bin_size),2); 
-pe_orig_all = []; 
-d_orig_all = []; 
-rt_all = []; 
-
 for iSub = 1:21
     load([session.ID{iSub} '_scanData_processed.mat'], 'paramSFM', 'paramMimic');
     pe_orig = []; d_orig = []; rt = []; 
@@ -613,13 +596,11 @@ for iSub = 1:21
         d_orig = [d_orig paramSFM.track{iS}(:,1)'];
         rt = [rt DataMat.reactionTime.zscore{iSub,iS}'];
     end
-    pe_orig_all = [pe_orig_all pe_orig]; 
-    d_orig_all = [d_orig_all d_orig]; 
-    rt_all = [rt_all rt]; 
     
-    [coefval(iSub), pval(iSub)] = corr((pe_orig'-0.5).*d_orig', rt','type','Spearman');
-    
-    
+    plot((pe_orig-0.5).*d_orig +0.5, rt,'ko')
+    figure(); plot(pe_orig, rt.*d_orig,'ko')
+    asdf
+
     for iBin = 1:(length(Rrange)-Bin_size)
         indCW = ((d_orig == 1) & (pe_orig > Rrange(iBin)) & (pe_orig <= Rrange(iBin+Bin_size))); 
         indCCW = ((d_orig ~= 1) & (pe_orig > Rrange(iBin)) & (pe_orig <= Rrange(iBin+Bin_size)));
@@ -640,15 +621,6 @@ for iSub = 1:21
     end
 end
 
-nanmean(coefval)
-[h,p,ci,stats] = ttest(coefval)
-
-[coefval_all, pval_all] = corr((pe_orig_all'-0.5).*d_orig_all', rt_all','type','Spearman')
-[coefval_all, pval_all] = corr((pe_orig_all'-0.5).*d_orig_all', rt_all')
-[coefval_all, pval_all] = corr((pe_orig_all'-0.5), d_orig_all','type','Spearman')
-[coefval_all, pval_all] = corr((pe_orig_all'-0.5), d_orig_all')
-
-
 % Substitute nan value
 for iSub = 1:21
     indVal = ~isnan(binRT.ccw(iSub,:)); 
@@ -662,26 +634,10 @@ end
 cwValInd = sum(isnan(binRT.cw))<10; 
 ccwValInd = sum(isnan(binRT.ccw))<10; 
 
-figure(); hold on; 
-plot(nanmean(peBin_rt), nanmean(binRT.ccw),'b-')
-plot(nanmean(peBin_rt), nanmean(binRT.cw),'r-')
-
-figure(40); clf; 
-SP = subplot(1,2,1); cla; hold on; 
-plot(pe_orig_all(d_orig_all==1), rt_all(d_orig_all==1),'k.'); 
-plot(nanmean(peBin_rt), nanmean(binRT.cw),'w-','linewidth',3)
-plot(nanmean(peBin_rt), nanmean(binRT.cw),'r-','linewidth',1.5)
-SP = subplot(1,2,2); cla; hold on; 
-plot(pe_orig_all(d_orig_all~=1), rt_all(d_orig_all~=1),'k.'); 
-plot(nanmean(peBin_rt), nanmean(binRT.ccw),'w-','linewidth',3)
-plot(nanmean(peBin_rt), nanmean(binRT.ccw),'b-','linewidth',1.5)
 
 
 
 
-pe_orig_all = [pe_orig_all pe_orig]; 
-    d_orig_all = [d_orig_all d_orig]; 
-    rt_all
 
 
 
