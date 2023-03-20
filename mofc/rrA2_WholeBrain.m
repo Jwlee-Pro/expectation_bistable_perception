@@ -137,6 +137,12 @@ for iSub = ValSub
     for iS = 1:length(filename.sfm)
         NiftiFile_sfm{iS} = load_nii(filename.sfm{iS});
     end
+    [d, hdr] = cbiReadNifti(filename.sfm{iS},{[],[],[],[]},'native');
+    d = double(d);
+    % High-Pass time series (used local mean)
+    highpassPeriod = nTotalFrame / nTotalCycle;
+    htSeries = removeLowFqDrift(tSeries, highpassPeriod);
+
     for iS = 1:length(filename.mimic)
         NiftiFile_mimic{iS} = load_nii(filename.mimic{iS});
     end
@@ -211,7 +217,7 @@ for iSub = ValSub
             seedTS(2,:) = matSFM{iS,iSub}.result_rs.Percept;    % Choice
             seedTS(3,:) = matSFM{iS,iSub}.result_rs.UU;         % U
             seedTS(4,:) = 1:125;                                % Trend
-
+            
             for iVox = 1:length(Nifti_AlliS_filt(:,1)) 
                 if sum(isnan(Nifti_AlliS_filt(iVox,:))) < 5
                     targetTS = Nifti_AlliS_filt(iVox,(1:125) + (125*(iS-1))); 

@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/mrTools/!svn/ver/1607/trunk/mrUtilities/File/mlrImage
+END
+mlrLoadImageHeader.m
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/mrTools/!svn/ver/1518/trunk/mrUtilities/File/mlrImage/mlrLoadImageHeader.m
+END
+mlrIsImageFile.m
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/mrTools/!svn/ver/1518/trunk/mrUtilities/File/mlrImage/mlrIsImageFile.m
+END
+mlrGetAllImageFilenames.m
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/mrTools/!svn/ver/1607/trunk/mrUtilities/File/mlrImage/mlrGetAllImageFilenames.m
+END

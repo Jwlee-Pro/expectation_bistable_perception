@@ -1,0 +1,173 @@
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/mrTools/!svn/ver/1622/trunk/mrAlign
+END
+talairach.m
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/mrTools/!svn/ver/1419/trunk/mrAlign/talairach.m
+END
+hist2.m
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/mrTools/!svn/ver/2/trunk/mrAlign/hist2.m
+END
+interpVolume.m
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/mrTools/!svn/ver/875/trunk/mrAlign/interpVolume.m
+END
+mrAlign.m
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/mrTools/!svn/ver/372/trunk/mrAlign/mrAlign.m
+END
+checkAlignmentGUI.fig
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/mrTools/!svn/ver/1025/trunk/mrAlign/checkAlignmentGUI.fig
+END
+regHistogram.mexmaci64
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/mrTools/!svn/ver/1413/trunk/mrAlign/regHistogram.mexmaci64
+END
+regHistogram.mexlx
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/mrTools/!svn/ver/2/trunk/mrAlign/regHistogram.mexlx
+END
+intensityContrastCorrection.m
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/mrTools/!svn/ver/1413/trunk/mrAlign/intensityContrastCorrection.m
+END
+errGaussRob.m
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/mrTools/!svn/ver/2/trunk/mrAlign/errGaussRob.m
+END
+mrAlignGUI.m
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/mrTools/!svn/ver/1622/trunk/mrAlign/mrAlignGUI.m
+END
+getAlignGUI.m
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/mrTools/!svn/ver/1435/trunk/mrAlign/getAlignGUI.m
+END
+refreshAlignDisplay.m
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/mrTools/!svn/ver/452/trunk/mrAlign/refreshAlignDisplay.m
+END
+getGuiXform.m
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/mrTools/!svn/ver/2/trunk/mrAlign/getGuiXform.m
+END
+exportTal2mrLR.m
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/mrTools/!svn/ver/1419/trunk/mrAlign/exportTal2mrLR.m
+END
+regHistogram.mexglx
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/mrTools/!svn/ver/1403/trunk/mrAlign/regHistogram.mexglx
+END
+regHistogram.mexa64
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/mrTools/!svn/ver/1487/trunk/mrAlign/regHistogram.mexa64
+END
+mrAlignGUI.fig
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/mrTools/!svn/ver/1622/trunk/mrAlign/mrAlignGUI.fig
+END
+regHistogram.mexhp7
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/mrTools/!svn/ver/2/trunk/mrAlign/regHistogram.mexhp7
+END
+regHistogram.mexmac
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/mrTools/!svn/ver/1466/trunk/mrAlign/regHistogram.mexmac
+END
+regHistogram.dll
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/mrTools/!svn/ver/2/trunk/mrAlign/regHistogram.dll
+END
+computeAlignment.m
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/mrTools/!svn/ver/1621/trunk/mrAlign/computeAlignment.m
+END
+setAlignGUI.m
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/mrTools/!svn/ver/2/trunk/mrAlign/setAlignGUI.m
+END
+checkAlignment.m
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/mrTools/!svn/ver/6/trunk/mrAlign/checkAlignment.m
+END
+regHistogram.mex4
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/mrTools/!svn/ver/2/trunk/mrAlign/regHistogram.mex4
+END
+mutualInformation.m
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/mrTools/!svn/ver/2/trunk/mrAlign/mutualInformation.m
+END
+checkAlignmentGUI.m
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/mrTools/!svn/ver/2/trunk/mrAlign/checkAlignmentGUI.m
+END
+regHistogram.c
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/mrTools/!svn/ver/2/trunk/mrAlign/regHistogram.c
+END
+regHistogram.mexmaci
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/mrTools/!svn/ver/1469/trunk/mrAlign/regHistogram.mexmaci
+END

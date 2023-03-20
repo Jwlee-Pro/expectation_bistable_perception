@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/mrTools/!svn/ver/1612/trunk/mrLoadRet/Plot
+END
+plotMeanOfMeanTSeries.m
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/mrTools/!svn/ver/1086/trunk/mrLoadRet/Plot/plotMeanOfMeanTSeries.m
+END
+plotMeanFourierAmp.m
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/mrTools/!svn/ver/1086/trunk/mrLoadRet/Plot/plotMeanFourierAmp.m
+END
+mlrDisplayEPI.m
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/mrTools/!svn/ver/1612/trunk/mrLoadRet/Plot/mlrDisplayEPI.m
+END
+plotMeanTSeries.m
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/mrTools/!svn/ver/1086/trunk/mrLoadRet/Plot/plotMeanTSeries.m
+END
+timecoursePlot.m
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/mrTools/!svn/ver/1003/trunk/mrLoadRet/Plot/timecoursePlot.m
+END
+mlrSpikeDetector.m
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/mrTools/!svn/ver/1287/trunk/mrLoadRet/Plot/mlrSpikeDetector.m
+END
