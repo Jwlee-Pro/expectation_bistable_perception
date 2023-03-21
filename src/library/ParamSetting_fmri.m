@@ -15,13 +15,13 @@ session.ID{11} = 'IR110722';
 session.ID{12} = 'RB110617'; 
 session.ID{13} = 'SL110621'; 
 session.ID{14} = 'SP110818'; 
-% session.ID{15} = 'EJC_1';
-% session.ID{16} = 'EJC_2';
-% session.ID{17} = 'JHR_1';
-% session.ID{18} = 'JHR_2';
-% session.ID{19} = 'XJWL001_1';
-% session.ID{20} = 'XKWC045_1';
-% session.ID{21} = 'XKWC045_2';
+session.ID{15} = 'EJC_1';
+session.ID{16} = 'EJC_2';
+session.ID{17} = 'JHR_1';
+session.ID{18} = 'JHR_2';
+session.ID{19} = 'XJWL001_1';
+session.ID{20} = 'XKWC045_1';
+session.ID{21} = 'XKWC045_2';
 
 
 % Colormap

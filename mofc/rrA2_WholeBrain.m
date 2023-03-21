@@ -137,11 +137,6 @@ for iSub = ValSub
     for iS = 1:length(filename.sfm)
         NiftiFile_sfm{iS} = load_nii(filename.sfm{iS});
     end
-    [d, hdr] = cbiReadNifti(filename.sfm{iS},{[],[],[],[]},'native');
-    d = double(d);
-    % High-Pass time series (used local mean)
-    highpassPeriod = nTotalFrame / nTotalCycle;
-    htSeries = removeLowFqDrift(tSeries, highpassPeriod);
 
     for iS = 1:length(filename.mimic)
         NiftiFile_mimic{iS} = load_nii(filename.mimic{iS});
@@ -179,6 +174,12 @@ for iSub = ValSub
         end
     end
     
+    % Subtract run-average fluctuation
+    n_1 = length(Nifti_AlliS_filt(1,:))/125;
+    n_2 = length(Nifti_AlliS_rep_filt(1,:))/125;
+    Nifti_AlliS_filt = Nifti_AlliS_filt - repmat(nanmean(reshape([Nifti_AlliS_filt Nifti_AlliS_rep_filt], length([Nifti_AlliS_filt Nifti_AlliS_rep_filt]), 125,(n_1+n_2)),3),1,n_1); 
+    Nifti_AlliS_rep_filt = Nifti_AlliS_rep_filt - repmat(nanmean(reshape([Nifti_AlliS_filt Nifti_AlliS_rep_filt], length([Nifti_AlliS_filt Nifti_AlliS_rep_filt]), 125,(n_1+n_2)),3),1,n_2); 
+    
     
     % Visualize the time-series of an exempler voxel. 
     set(figure(1),'position',[2 289 1040 516]); clf; 
@@ -204,113 +205,42 @@ for iSub = ValSub
     plot(time_fmri, matSFM{1,iSub}.result_rs.EU,'color','k');
     xlabel('Time (TR)'); ylabel('Entropy (H)'); ylim([0 1]);  
     
-    drawnow; 
-    asdf
-    
-    clear MatFit; 
-    if CalculateWhat == 1
-        % Fit the time-series to the model 
-        for iS = 1:4
-            fprintf(['Session #' num2str(iSub) ', iS = ' num2str(iS) '...\n'])
-            clear seedTS;
-            seedTS(1,:) = matSFM{iS,iSub}.result_rs.matPrior;   % PE
-            seedTS(2,:) = matSFM{iS,iSub}.result_rs.Percept;    % Choice
-            seedTS(3,:) = matSFM{iS,iSub}.result_rs.UU;         % U
-            seedTS(4,:) = 1:125;                                % Trend
-            
-            for iVox = 1:length(Nifti_AlliS_filt(:,1)) 
-                if sum(isnan(Nifti_AlliS_filt(iVox,:))) < 5
-                    targetTS = Nifti_AlliS_filt(iVox,(1:125) + (125*(iS-1))); 
-                    tempX = [seedTS; targetTS];
-                    ValInd = ~isnan(mean(tempX)); 
+    % save BOLD mat
+    save(['/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/wholebrain/wb_bold_sub' num2str(iSub) '.mat'],'Nifti_AlliS_filt', 'Nifti_AlliS_rep_filt')
 
-                    paramModel1 = [0 0 1 0 0]; 
-                    [paramout_temp, fval_temp] = fminsearchbnd( @(param) fitModel_PE(param, targetTS(ValInd), seedTS(:,ValInd)), ...
-                        paramModel1, [-10 -10 0 -10 -10] ,[10 10 10 10 10]);
-                    MatFit{iS}(iVox,:) = paramout_temp; 
-                else
-                    MatFit{iS}(iVox,:) = nan(1,5); 
-                end
-            end
+    SimpleCorr_sfm = nan(1,length(GrayCoord)); 
+    SimplePval_sfm = nan(1,length(GrayCoord)); 
+    PartCorr_sfm = nan(1,length(GrayCoord)); 
+    PartPval_sfm = nan(1,length(GrayCoord)); 
+    SimpleCorr_mimic = nan(1,length(GrayCoord)); 
+    SimplePval_mimic = nan(1,length(GrayCoord)); 
+    PartCorr_mimic = nan(1,length(GrayCoord)); 
+    PartPval_mimic = nan(1,length(GrayCoord)); 
+    for iVox = 1:length(GrayCoord)
+        nanInd = ~isnan(Nifti_AlliS_filt(iVox,:) + PE_all{iSub} + Percept_all{iSub}); 
+        if sum(nanInd) > 5
+            [SimpleCorr_sfm(iVox), SimplePval_sfm(iVox)] = corr(Nifti_AlliS_filt(iVox,nanInd)', PE_all{iSub}(nanInd)'); 
+            [PartCorr_sfm(iVox), temp] = partcorr(Nifti_AlliS_filt(iVox,nanInd)', PE_all{iSub}(nanInd)', Percept_all{iSub}(nanInd)');
+            PartPval_sfm(iVox) = temp.p; 
         end
-    save(['/Volumes/Data_CSNL/people/JWL/Projects(workspace)/Structure-from-motion/Paper Writing/LeeEtal_ManuSfM/2017_M10_figure/MVPA analysis/ForNN_2018May/FittedResult_wholeBrain_' num2str(iSub) '.mat'],'MatFit')
-
-%     % Calculate the correlation
-%     MatCorr_sfm = nan(1,length(GrayCoord)); 
-%     MatCorr_mimic = nan(1,length(GrayCoord)); 
-%     
-    elseif CalculateWhat == 2
-
-        for iVox = 1:length(GrayCoord)
-            nanInd = ~isnan(Nifti_AlliS_filt(iVox,:) + PE_all{iSub} + Percept_all{iSub}); 
-            if sum(nanInd) > 5
-                [SimpleCorr_sfm(iVox), SimplePval_sfm(iVox)] = corr(Nifti_AlliS_filt(iVox,nanInd)', PE_all{iSub}(nanInd)'); 
-                MI(iVox) = calculate_mi(Nifti_AlliS_filt(iVox,nanInd),PE_all{iSub}(nanInd))
-%                 [MatCorr_sfm(iVox), temp] = partcorr(Nifti_AlliS_filt(iVox,nanInd)', PE_all{iSub}(nanInd)', Percept_all{iSub}(nanInd)');
-%                 MatPval_sfm(iVox) = temp.p; 
-            end
-            nanInd = ~isnan(Nifti_AlliS_rep_filt(iVox,:) + PE_all_mimic{iSub} + Percept_all_mimic{iSub}); 
-            if sum(nanInd) > 5
-                [SimpleCorr_mimic(iVox), SimplePval_mimic(iVox)] = corr(Nifti_AlliS_rep_filt(iVox,nanInd)', PE_all_mimic{iSub}(nanInd)'); 
-%                 [MatCorr_mimic(iVox),temp] = partcorr(Nifti_AlliS_rep_filt(iVox,nanInd)', PE_all_mimic{iSub}(nanInd)', Percept_all_mimic{iSub}(nanInd)');
-%                 MatPval_mimic(iVox) = temp.p; 
-            end
+        nanInd = ~isnan(Nifti_AlliS_rep_filt(iVox,:) + PE_all_mimic{iSub} + Percept_all_mimic{iSub}); 
+        if sum(nanInd) > 5
+            [SimpleCorr_mimic(iVox), SimplePval_mimic(iVox)] = corr(Nifti_AlliS_rep_filt(iVox,nanInd)', PE_all_mimic{iSub}(nanInd)'); 
+            [PartCorr_mimic(iVox),temp] = partcorr(Nifti_AlliS_rep_filt(iVox,nanInd)', PE_all_mimic{iSub}(nanInd)', Percept_all_mimic{iSub}(nanInd)');
+            PartPval_mimic(iVox) = temp.p; 
         end
-        MatCorr{iSub}.sfm_corr = SimpleCorr_sfm;
-        MatCorr{iSub}.sfm_pval = SimplePval_sfm;
-        
-        MatCorr{iSub}.mimic_corr = SimpleCorr_mimic;
-        MatCorr{iSub}.mimic_pval = SimplePval_mimic;
-        
     end
-%     
-%     
-%     % Save Data
-%     save(['/Volumes/Data_CSNL/people/JWL/Projects(workspace)/Structure-from-motion/Paper Writing/LeeEtal_ManuSfM/2017_M10_figure/MVPA analysis/ForNN_2018May/CorrelationMaps/AllCorrs' num2str(iSub) '_smooth.mat'],'MatCorr_sfm', 'MatCorr_mimic','SimpleCorr_sfm', 'SimpleCorr_mimic','MatPval_sfm','MatPval_mimic','SimplePval_sfm','SimplePval_mimic');
-% %     save(['/Volumes/Data_CSNL/people/JWL/Projects(workspace)/Structure-from-motion/Paper Writing/LeeEtal_ManuSfM/2017_M10_figure/MVPA analysis/FinalAnalysis/TS_OMPFC' num2str(iSub) '.mat'],'Nifti_AlliS_filt','Nifti_AlliS_rep_filt');
+    Corr_simple.sfm_corr = SimpleCorr_sfm;
+    Corr_simple.sfm_pval = SimplePval_sfm;
+    Corr_simple.mimic_corr = SimpleCorr_mimic;
+    Corr_simple.mimic_pval = SimplePval_mimic;
+    
+    Corr_part.sfm_corr = PartCorr_sfm;
+    Corr_part.sfm_pval = PartPval_sfm;
+    Corr_part.mimic_corr = PartCorr_mimic;
+    Corr_part.mimic_pval = PartPval_mimic;
+    save(['/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/wholebrain/corr_sub' num2str(iSub) '.mat'],'Corr_simple', 'Corr_part')
 end
-
-
-
-
-%% Analyze the fitting result 
-SubRep = 4; 
-
-
-
-
-
-
-% 
-% 
-% SP = subplot('position',[0.1300 0.75 0.1237 0.2]); cla; hold on;
-% % Explained variance 
-% SubRep = 4; 
-% p_crit = 0.01; 
-% xaxis_a = -1:0.02:1; 
-% a = hist(MatCorr{SubRep}.sfm_corr,xaxis_a);
-% plot(xaxis_a, a,'color','k'); 
-% b = hist(MatCorr{SubRep}.sfm_corr(MatCorr{SubRep}.sfm_pval < p_crit),xaxis_a);
-% plot(xaxis_a, b,'color','k','linewidth',1); 
-% V = [xaxis_a; b]'; F = 1:length(V); 
-% patch('Faces',F,'Vertices',V); 
-% xlim([-1 1]); 
-% xlabel('corr(PE, BOLD)'); ylabel('Number of voxels'); 
-% set(SP, 'box', 'off', 'TickDir','out','XTick', [-1 0 1],'FontSize', 10,'ycolor','k','xcolor','k')
-% 
-% 
-% MaxInd = find(MatCorr{SubRep}.sfm_corr == max(MatCorr{SubRep}.sfm_corr)); 
-% MinInd = find(MatCorr{SubRep}.sfm_corr == min(MatCorr{SubRep}.sfm_corr)); 
-% figure(2); clf; 
-% subplot(2,4,1:3); plot(PE_all{SubRep},'k');
-% 
-% subplot(2,4,5:7); plot(Nifti_AlliS_filt(MaxInd, :),'r'); hold on; 
-%  plot(Nifti_AlliS_filt(MinInd, :),'b'); 
-% subplot(3,4,[4 8 12]); plot(PE_all{SubRep}, Nifti_AlliS_filt(MaxInd, :),'r.'); hold on; 
-% plot(PE_all{SubRep}, Nifti_AlliS_filt(MinInd, :),'b.'); 
-
-
-
 
 
 
