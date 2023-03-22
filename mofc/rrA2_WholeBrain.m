@@ -27,7 +27,7 @@ cmap_choice=[102 204 255;204 204 204; 255 204 102]./255;
 Common_fontsize = 10; 
 
 
-code_loc = '/Users/joonwon/Dropbox/Workspace_2022/Structure_from_motion/expectation_bistable_perception'; 
+code_loc = '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception'; 
 
 
 % Data loading information & toolbox setting
@@ -70,20 +70,24 @@ end
 % Load behavioral data (model regressors)
 fprintf('Load behavioral data.... \n'); 
 ParamSetting_fmri;
-load([code_loc '/data/behavior/model_regressors.mat'], 'matSFM','matMimic','matSFM_PredCo');
+% load([code_loc '/data/behavior/model_regressors.mat'], 'matSFM','matMimic','matSFM_PredCo');
+load('/Volumes/Data_CSNL/people/JWL/Projects(workspace)/Structure-from-motion/Paper Writing/LeeEtal_ManuSfM/2017_M7/MTanalysis_deep/LeeLee_PriorEffect_workspace_PredCo20171127.mat','matSFM','matMimic','matSFM_PredCo'); 
+load('mDataMat_all'); 
 
 ValSub =  1:21; 
 
 Percept_all = cell(1,21); Percept_all_mimic = cell(1,21); 
 PE_all = cell(1,21); PE_all_mimic = cell(1,21); 
 U_all = cell(1,21); H_all = cell(1,21);
+DV_all = cell(1,21); DV_all_mimic = cell(1,21);
 nSess = [ones(1,14) ones(1,7)*4];
 for iSub = ValSub
     for iS = 1:4
-        Percept_all{iSub} = [Percept_all{iSub} matSFM{iS,iSub}.result_rs.Percept]; 
-        PE_all{iSub} = [PE_all{iSub} matSFM{iS,iSub}.result_rs.matPrior];         
-        H_all{iSub} = [H_all{iSub} matSFM{iS,iSub}.result_rs.EU];         
-        U_all{iSub} = [U_all{iSub} matSFM{iS,iSub}.result_rs.UU];         
+        Percept_all{iSub} = [Percept_all{iSub} mDataMat.Decision_conv{iSub,iS}]; 
+        DV_all{iSub} = [DV_all{iSub} mDataMat.DV_conv{iSub,iS}]; 
+        PE_all{iSub} = [PE_all{iSub} mDataMat.PE_conv{iSub,iS}];         
+        H_all{iSub} = [H_all{iSub} mDataMat.H_conv{iSub,iS}];         
+        U_all{iSub} = [U_all{iSub} mDataMat.U_conv{iSub,iS}];         
     end
     
     for iS = 1:nSess(iSub)
@@ -206,7 +210,7 @@ for iSub = ValSub
     xlabel('Time (TR)'); ylabel('Entropy (H)'); ylim([0 1]);  
     
     % save BOLD mat
-    save(['/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/wholebrain/wb_bold_sub' num2str(iSub) '.mat'],'Nifti_AlliS_filt', 'Nifti_AlliS_rep_filt')
+    save([code_loc '/data/wholebrain/wb_bold_sub' num2str(iSub) '.mat'],'Nifti_AlliS_filt', 'Nifti_AlliS_rep_filt')
 
     SimpleCorr_sfm = nan(1,length(GrayCoord)); 
     SimplePval_sfm = nan(1,length(GrayCoord)); 
@@ -239,14 +243,68 @@ for iSub = ValSub
     Corr_part.sfm_pval = PartPval_sfm;
     Corr_part.mimic_corr = PartCorr_mimic;
     Corr_part.mimic_pval = PartPval_mimic;
-    save(['/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/wholebrain/corr_sub' num2str(iSub) '.mat'],'Corr_simple', 'Corr_part')
+    save([code_loc '/data/wholebrain/corr_sub' num2str(iSub) '.mat'],'Corr_simple', 'Corr_part')
 end
 
 
 
 
+for iSub = ValSub
+    iSub
+    load([code_loc '/data/wholebrain/wb_bold_sub' num2str(iSub) '.mat'],'Nifti_AlliS_filt', 'Nifti_AlliS_rep_filt')
+
+    SimpleCorr_sfm = nan(1,length(GrayCoord)); 
+    SimplePval_sfm = nan(1,length(GrayCoord)); 
+    PartCorr_sfm = nan(1,length(GrayCoord)); 
+    PartPval_sfm = nan(1,length(GrayCoord)); 
+    SimpleCorr_mimic = nan(1,length(GrayCoord)); 
+    SimplePval_mimic = nan(1,length(GrayCoord)); 
+    PartCorr_mimic = nan(1,length(GrayCoord)); 
+    PartPval_mimic = nan(1,length(GrayCoord)); 
+    for iVox = 1:length(GrayCoord)
+        nanInd = ~isnan(Nifti_AlliS_filt(iVox,:) + DV_all{iSub} + Percept_all{iSub}); 
+        if sum(nanInd) > 5
+            [SimpleCorr_sfm(iVox), SimplePval_sfm(iVox)] = corr(Nifti_AlliS_filt(iVox,nanInd)', DV_all{iSub}(nanInd)'); 
+            [PartCorr_sfm(iVox), temp] = partcorr(Nifti_AlliS_filt(iVox,nanInd)', DV_all{iSub}(nanInd)', Percept_all{iSub}(nanInd)');
+            PartPval_sfm(iVox) = temp.p; 
+        end
+%         nanInd = ~isnan(Nifti_AlliS_rep_filt(iVox,:) + PE_all_mimic{iSub} + Percept_all_mimic{iSub}); 
+%         if sum(nanInd) > 5
+%             [SimpleCorr_mimic(iVox), SimplePval_mimic(iVox)] = corr(Nifti_AlliS_rep_filt(iVox,nanInd)', PE_all_mimic{iSub}(nanInd)'); 
+%             [PartCorr_mimic(iVox),temp] = partcorr(Nifti_AlliS_rep_filt(iVox,nanInd)', PE_all_mimic{iSub}(nanInd)', Percept_all_mimic{iSub}(nanInd)');
+%             PartPval_mimic(iVox) = temp.p; 
+%         end
+    end
+    save([code_loc '/data/wholebrain/DV/corr_sub' num2str(iSub) '.mat'],'Corr_simple', 'Corr_part')
+    
+    SimpleCorr_sfm = nan(1,length(GrayCoord)); 
+    SimplePval_sfm = nan(1,length(GrayCoord)); 
+    PartCorr_sfm = nan(1,length(GrayCoord)); 
+    PartPval_sfm = nan(1,length(GrayCoord)); 
+    SimpleCorr_mimic = nan(1,length(GrayCoord)); 
+    SimplePval_mimic = nan(1,length(GrayCoord)); 
+    PartCorr_mimic = nan(1,length(GrayCoord)); 
+    PartPval_mimic = nan(1,length(GrayCoord)); 
+    for iVox = 1:length(GrayCoord)
+        nanInd = ~isnan(Nifti_AlliS_filt(iVox,:) + DV_all{iSub} + Percept_all{iSub}); 
+        if sum(nanInd) > 5
+            [SimpleCorr_sfm(iVox), SimplePval_sfm(iVox)] = corr(Nifti_AlliS_filt(iVox,nanInd)', Percept_all{iSub}(nanInd)'); 
+%             [PartCorr_sfm(iVox), temp] = partcorr(Nifti_AlliS_filt(iVox,nanInd)', DV_all{iSub}(nanInd)', Percept_all{iSub}(nanInd)');
+%             PartPval_sfm(iVox) = temp.p; 
+        end
+%         nanInd = ~isnan(Nifti_AlliS_rep_filt(iVox,:) + PE_all_mimic{iSub} + Percept_all_mimic{iSub}); 
+%         if sum(nanInd) > 5
+%             [SimpleCorr_mimic(iVox), SimplePval_mimic(iVox)] = corr(Nifti_AlliS_rep_filt(iVox,nanInd)', PE_all_mimic{iSub}(nanInd)'); 
+%             [PartCorr_mimic(iVox),temp] = partcorr(Nifti_AlliS_rep_filt(iVox,nanInd)', PE_all_mimic{iSub}(nanInd)', Percept_all_mimic{iSub}(nanInd)');
+%             PartPval_mimic(iVox) = temp.p; 
+%         end
+    end
+    save([code_loc '/data/wholebrain/Decision/corr_sub' num2str(iSub) '.mat'],'Corr_simple', 'Corr_part')
+end
 
 
+%% Figure 1 
+Fig_omfc_1
 
 
 
