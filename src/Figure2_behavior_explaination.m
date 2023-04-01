@@ -584,7 +584,7 @@ save_figureToPDF(FigHandle, 'Figure2_BehaviorDynamics');
 load('/Volumes/Data_CSNL/people/JWL/Projects(workspace)/Structure-from-motion/Paper Writing/LeeEtal_ManuSfM/2017_M7/Data_allTS_15.mat'); 
 load('/Volumes/Data_CSNL/people/JWL/Projects(workspace)/Structure-from-motion/Paper Writing/LeeEtal_ManuSfM/2017_M7/MTanalysis_deep/LeeLee_PriorEffect_workspace_PredCo20171127.mat','matSFM','matMimic','matSFM_PredCo'); 
 
-Bin_size = 20;
+Bin_size = 15;
 Bin_dt = 0.01;
 peall = []; 
 for iSub = 1:21
@@ -592,14 +592,12 @@ for iSub = 1:21
         peall = [peall matSFM{iS,iSub}.result.matPrior];
     end
 end
-minPE = min(abs(peall)); 
-maxPE = max(abs(peall)); 
-Rrange = minPE:Bin_dt:maxPE; 
+Rrange = 0.3:Bin_dt:0.7; 
 
 
 clear peBin_rt binRT coefval
 nBin = 12; 
-nDD = zeros((length(Rrange)-Bin_size),2); 
+nDD = zeros(length(Rrange),2); 
 pe_orig_all = []; 
 d_orig_all = []; 
 rt_all = []; 
@@ -620,17 +618,17 @@ for iSub = 1:21
     [coefval(iSub), pval(iSub)] = corr((pe_orig'-0.5).*d_orig', rt','type','Spearman');
     
     
-    for iBin = 1:(length(Rrange)-Bin_size)
-        indCW = ((d_orig == 1) & (pe_orig > Rrange(iBin)) & (pe_orig <= Rrange(iBin+Bin_size))); 
-        indCCW = ((d_orig ~= 1) & (pe_orig > Rrange(iBin)) & (pe_orig <= Rrange(iBin+Bin_size)));
-        peBin_rt(iSub,iBin) = (Rrange(iBin)+Rrange(iBin+Bin_size))/2; 
+    for iBin = 1:length(Rrange)
+        indCW = ((d_orig == 1) & (pe_orig > Rrange(iBin)-0.1) & (pe_orig <= Rrange(iBin)+0.1)); 
+        indCCW = ((d_orig ~= 1) & (pe_orig > Rrange(iBin)-0.1) & (pe_orig <= Rrange(iBin)+0.1));
+        peBin_rt(iSub,iBin) = Rrange(iBin);
         if (sum(indCW)>1)
-            binRT.cw(iSub, iBin) = mean(rt(indCW)); 
+            binRT.cw(iSub, iBin) = nanmean(rt(indCW)); 
         else
             binRT.cw(iSub, iBin) = nan; 
         end
         if (sum(indCCW)>1)
-            binRT.ccw(iSub, iBin) = mean(rt(indCCW)); 
+            binRT.ccw(iSub, iBin) = nanmean(rt(indCCW)); 
         else
             binRT.ccw(iSub, iBin) = nan; 
         end
@@ -677,12 +675,37 @@ plot(nanmean(peBin_rt), nanmean(binRT.ccw),'w-','linewidth',3)
 plot(nanmean(peBin_rt), nanmean(binRT.ccw),'b-','linewidth',1.5)
 
 
+%% Figure 2ij (RT correspondence) 
+figure(1001); clf; 
+SP = subplot(1,1,1); cla; hold on; 
+xval = [1-nanmean(peBin_rt) flip(1-nanmean(peBin_rt))]; 
+temp = binRT.ccw; 
+stdval  = nanstd(temp)/sqrt(length(session.ID)-1); 
+meanval = nanmean(temp); 
+yval = [-stdval+meanval +flip(stdval+meanval)] ; 
+patch(xval, yval, cmap_c(1,:),'facealpha',0.4,'edgecolor','none'); 
+plot(1-nanmean(peBin_rt),meanval,'color',cmap_c(1,:),'linewidth',1.5)
+
+xval = [nanmean(peBin_rt) flip(nanmean(peBin_rt))]; 
+temp = binRT.cw; 
+stdval  = nanstd(temp)/sqrt(length(session.ID)-1); 
+meanval = nanmean(temp); 
+yval = [-stdval+meanval +flip(stdval+meanval)] ; 
+patch(xval, yval, cmap_c(3,:),'facealpha',0.4,'edgecolor','none'); 
+plot(nanmean(peBin_rt),meanval,'color',cmap_c(3,:),'linewidth',1.5)
 
 
-pe_orig_all = [pe_orig_all pe_orig]; 
-    d_orig_all = [d_orig_all d_orig]; 
-    rt_all
+set(gcf, 'color','w');
 
+figure(); 
 
+% [ss,sI] = sort(DataFit.param_alphaVary(:,2))
+% [ss,sI] = sort(DataFit.param_alphaVary(:,3))
+sI = IndSorted;
 
-
+SP = subplot(1,2,1); cla; hold on; 
+plot(nanmean(peBin_rt(sI(1:10),:)), nanmean(binRT.ccw(sI(1:10),:)),'b-')
+plot(nanmean(peBin_rt(sI(11:end),:)), nanmean(binRT.ccw(sI(11:end),:)),'r-')
+SP = subplot(1,2,2); cla; hold on; 
+plot(nanmean(peBin_rt(sI(1:10),:)), nanmean(binRT.cw(sI(1:10),:)),'b-')
+plot(nanmean(peBin_rt(sI(11:end),:)), nanmean(binRT.cw(sI(11:end),:)),'r-')

@@ -71,10 +71,10 @@ for iN = POparam.sampleRep
         result.matPrior(iT)=sum(PRparam.vectPi.*matPrior(iT,:));
         
         % (2) Random value extraction 
-        vectRand = rand(POparam.sampleSet(iN),1);
+        vectRand = rand(POparam.sampleSet(iN),1);  
         tL_cw    = find(vectRand<result.matPrior(iT));  
-        tL_ccw   = find(vectRand>=result.matPrior(iT));
-        inDpr    = vectRand<result.matPrior(iT); 
+        tL_ccw   = find(vectRand>=result.matPrior(iT));  
+        inDpr    = vectRand<result.matPrior(iT);  
 
         vectOutcome_A=[];
         if(~isempty(tL_cw))
@@ -877,9 +877,9 @@ set(SP, 'box', 'off', 'TickDir', 'out','FontSize', Common_fontsize,'Xtick',[],'Y
 
 
 % 
-FigHandle = gcf; 
-t = clock;
-save_figureToPDF(FigHandle, ['Sampling_algorithm' date() ]);
+% FigHandle = gcf; 
+% t = clock;
+% save_figureToPDF(FigHandle, ['Sampling_algorithm' date() ]);
 
 
 
@@ -997,8 +997,8 @@ set(SP, 'box', 'off', 'TickDir', 'out', 'XTick', [0:20:100],'XTicklabel',{'','',
 
 
 
-FigHandle = gcf; 
-save_figureToPDF(FigHandle, 'Fig2bc');
+% FigHandle = gcf; 
+% save_figureToPDF(FigHandle, 'Fig2bc');
 
 
 
