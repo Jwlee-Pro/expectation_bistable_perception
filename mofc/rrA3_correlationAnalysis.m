@@ -1,3 +1,5 @@
+clear all; close all; clc ;
+
 
 ValSub =  1:21; 
 code_loc = '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception'; 

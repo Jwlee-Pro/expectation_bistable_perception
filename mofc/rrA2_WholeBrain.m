@@ -64,15 +64,12 @@ end
 
 
 
-
-
-
 % Load behavioral data (model regressors)
 fprintf('Load behavioral data.... \n'); 
 ParamSetting_fmri;
 % load([code_loc '/data/behavior/model_regressors.mat'], 'matSFM','matMimic','matSFM_PredCo');
 load('/Volumes/Data_CSNL/people/JWL/Projects(workspace)/Structure-from-motion/Paper Writing/LeeEtal_ManuSfM/2017_M7/MTanalysis_deep/LeeLee_PriorEffect_workspace_PredCo20171127.mat','matSFM','matMimic','matSFM_PredCo'); 
-load('mDataMat_all'); 
+load([code_loc '/data/neural/mDataMat_all']); 
 
 ValSub =  1:21; 
 
