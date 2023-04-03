@@ -11,8 +11,8 @@ clear all; close all; clc;
 % 4. Validation in trial-to-trial level 
 % 5. Validation lawful relationship 
 runModules = {};
-runModules.compute_corr = 1; 
-runModules.criterion_filter = 1; 
+runModules.compute_corr = 0; 
+runModules.criterion_filter = 0; 
 
 
 %% [1] Preparation 
@@ -88,7 +88,7 @@ if runModules.compute_corr == 1
         load([code_loc '/data/wholebrain/wb_bold_sub' num2str(iSub) '.mat'],'Nifti_AlliS_filt', 'Nifti_AlliS_rep_filt')
 
         for iVox = 1:length(GrayCoord)
-            nanInd = ~isnan(Nifti_AlliS_filt(iVox,:) + PE_all{iSub} + Percept_all{iSub} + DV_all{iSub}); 
+            nanInd = ~isnan(Nifti_AlliS_filt(iVox,:) + PE_all{iSub} + Percept_all{iSub}); 
             if sum(nanInd) > 5
                 [corrMat.pe(iVox), pvalMat.pe(iVox)] = corr(Nifti_AlliS_filt(iVox,nanInd)', PE_all{iSub}(nanInd)'); 
                 [corrMat.dv(iVox), pvalMat.dv(iVox)] = corr(Nifti_AlliS_filt(iVox,nanInd)', DV_all{iSub}(nanInd)'); 
@@ -112,20 +112,10 @@ end
 %% Find voxels satisfying criterions
 if runModules.criterion_filter == 1 
     crits = ones(length(GrayCoord),1); 
-    mat_pe = []; 
-    mat_dv = []; 
-    mat_c = []; 
-    for iSub = ValSub
-        load([code_loc '/data/wholebrain/corr_sub' num2str(iSub) '.mat'],'corrMat', 'pvalMat')
-        mat_pe = [mat_pe; corrMat.pe];
-        mat_dv = [mat_dv; corrMat.dv];
-        mat_c = [mat_c; corrMat.c];
-    end
-    
-    % Nifit-mapping & save files 
-    nifti_mapping(mean(mat_pe.^2,1), crits, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_pe')
-    nifti_mapping(mean(mat_dv.^2,1), crits, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_dv')
-    nifti_mapping(mean(mat_c.^2,1), crits, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_c')
+    nifti_mapping(mean(cMat_simple.^2,2), crits, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_simple')
 end
+
+
+
 
 
