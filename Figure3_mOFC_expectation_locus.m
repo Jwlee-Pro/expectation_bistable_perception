@@ -86,28 +86,97 @@ if runModules.compute_corr == 1
     for iSub = ValSub
         fprintf(['Computing sub-' num2str(iSub) '\n']); 
         load([code_loc '/data/wholebrain/wb_bold_sub' num2str(iSub) '.mat'],'Nifti_AlliS_filt', 'Nifti_AlliS_rep_filt')
+        % temp_pe = diff(PE_all{iSub}); 
+        % temp_c = diff(Percept_all{iSub}); 
+        % temp_dv = diff(DV_all{iSub}); 
+        % for iVox = 1:length(GrayCoord)
+        %     nanInd = ~isnan(Nifti_AlliS_filt(iVox,:) + PE_all{iSub} + Percept_all{iSub} + DV_all{iSub}); 
+        %     nanInd_diff = ~isnan(diff(Nifti_AlliS_filt(iVox,:)) + diff(PE_all{iSub}) + diff(Percept_all{iSub}) + diff(DV_all{iSub})); 
+        %     if sum(nanInd) > 5
+        %         [corrMat.pe(iVox), pvalMat.pe(iVox)] = corr(Nifti_AlliS_filt(iVox,nanInd)', PE_all{iSub}(nanInd)'); 
+        %         [corrMat.dv(iVox), pvalMat.dv(iVox)] = corr(Nifti_AlliS_filt(iVox,nanInd)', DV_all{iSub}(nanInd)'); 
+        %         [corrMat.c(iVox), pvalMat.c(iVox)] = corr(Nifti_AlliS_filt(iVox,nanInd)', Percept_all{iSub}(nanInd)'); 
+        % 
+        %         [corrMat.pe_c(iVox), temp] = partcorr(Nifti_AlliS_filt(iVox,nanInd)', PE_all{iSub}(nanInd)', Percept_all{iSub}(nanInd)'); 
+        %         pvalMat.pe_c(iVox) = temp.p; 
+        %         [corrMat.c_pe(iVox), temp] = partcorr(Nifti_AlliS_filt(iVox,nanInd)', Percept_all{iSub}(nanInd)', PE_all{iSub}(nanInd)'); 
+        %         pvalMat.c_pe(iVox) = temp.p; 
+        % 
+        %         [corrMat.pe_dv(iVox), temp] = partcorr(Nifti_AlliS_filt(iVox,nanInd)', PE_all{iSub}(nanInd)', DV_all{iSub}(nanInd)'); 
+        %         pvalMat.pe_dv(iVox) = temp.p; 
+        %         [corrMat.dv_pe(iVox), temp] = partcorr(Nifti_AlliS_filt(iVox,nanInd)', DV_all{iSub}(nanInd)', PE_all{iSub}(nanInd)'); 
+        %         pvalMat.dv_pe(iVox) = temp.p; 
+        % 
+        %         % Diff
+        %         tempv = diff(Nifti_AlliS_filt(iVox,:)); 
+        %         [corrMat.diff_pe(iVox), pvalMat.diff_pe(iVox)] = corr(tempv(nanInd_diff)', temp_pe(nanInd_diff)'); 
+        %         [corrMat.diff_dv(iVox), pvalMat.diff_dv(iVox)] = corr(tempv(nanInd_diff)', temp_dv(nanInd_diff)'); 
+        %         [corrMat.diff_c(iVox), pvalMat.diff_c(iVox)] = corr(tempv(nanInd_diff)', temp_c(nanInd_diff)'); 
+        %     else
+        %         corrMat.pe(iVox) = nan; pvalMat.pe(iVox) = nan; 
+        %         corrMat.dv(iVox) = nan; pvalMat.dv(iVox) = nan; 
+        %         corrMat.c(iVox) = nan; pvalMat.c(iVox) = nan; 
+        % 
+        %         corrMat.pe_c(iVox) = nan; pvalMat.pe_c(iVox) = nan; 
+        %         corrMat.c_pe(iVox) = nan; pvalMat.c_pe(iVox) = nan; 
+        %         corrMat.pe_dv(iVox) = nan; pvalMat.pe_dv(iVox) = nan; 
+        %         corrMat.dv_pe(iVox) = nan; pvalMat.dv_pe(iVox) = nan; 
+        % 
+        %         corrMat.diff_pe(iVox) = nan; pvalMat.diff_pe(iVox) = nan; 
+        %         corrMat.diff_dv(iVox) = nan; pvalMat.diff_dv(iVox) = nan; 
+        %         corrMat.diff_c(iVox) = nan; pvalMat.diff_c(iVox) = nan; 
+        % 
+        %     end
+        % end
+        % save([code_loc '/data/wholebrain/corr_sub' num2str(iSub) '.mat'],'corrMat', 'pvalMat')
 
+
+        % Replay 
+        temp_pe = diff(PE_all_mimic{iSub}); 
+        temp_c = diff(Percept_all_mimic{iSub}); 
         for iVox = 1:length(GrayCoord)
-            nanInd = ~isnan(Nifti_AlliS_filt(iVox,:) + PE_all{iSub} + Percept_all{iSub} + DV_all{iSub}); 
+            nanInd = ~isnan(Nifti_AlliS_rep_filt(iVox,:) + PE_all_mimic{iSub} + Percept_all_mimic{iSub}); 
+            nanInd_diff = ~isnan(diff(Nifti_AlliS_rep_filt(iVox,:)) + diff(PE_all_mimic{iSub}) + diff(Percept_all_mimic{iSub})); 
             if sum(nanInd) > 5
-                [corrMat.pe(iVox), pvalMat.pe(iVox)] = corr(Nifti_AlliS_filt(iVox,nanInd)', PE_all{iSub}(nanInd)'); 
-                [corrMat.dv(iVox), pvalMat.dv(iVox)] = corr(Nifti_AlliS_filt(iVox,nanInd)', DV_all{iSub}(nanInd)'); 
-                [corrMat.c(iVox), pvalMat.c(iVox)] = corr(Nifti_AlliS_filt(iVox,nanInd)', Percept_all{iSub}(nanInd)'); 
+                [corrMat.pe(iVox), pvalMat.pe(iVox)] = corr(Nifti_AlliS_rep_filt(iVox,nanInd)', PE_all_mimic{iSub}(nanInd)'); 
+                % [corrMat.dv(iVox), pvalMat.dv(iVox)] = corr(Nifti_AlliS_rep_filt(iVox,nanInd)', DV_all{iSub}(nanInd)'); 
+                [corrMat.c(iVox), pvalMat.c(iVox)] = corr(Nifti_AlliS_rep_filt(iVox,nanInd)', Percept_all_mimic{iSub}(nanInd)'); 
 
-                [corrMat.pe_c(iVox), temp] = partcorr(Nifti_AlliS_filt(iVox,nanInd)', PE_all{iSub}(nanInd)', Percept_all{iSub}(nanInd)'); 
+                [corrMat.pe_c(iVox), temp] = partcorr(Nifti_AlliS_rep_filt(iVox,nanInd)', PE_all_mimic{iSub}(nanInd)', Percept_all_mimic{iSub}(nanInd)'); 
                 pvalMat.pe_c(iVox) = temp.p; 
-                [corrMat.c_pe(iVox), temp] = partcorr(Nifti_AlliS_filt(iVox,nanInd)', Percept_all{iSub}(nanInd)', PE_all{iSub}(nanInd)'); 
+                [corrMat.c_pe(iVox), temp] = partcorr(Nifti_AlliS_rep_filt(iVox,nanInd)', Percept_all_mimic{iSub}(nanInd)', PE_all_mimic{iSub}(nanInd)'); 
                 pvalMat.c_pe(iVox) = temp.p; 
 
-                [corrMat.pe_dv(iVox), temp] = partcorr(Nifti_AlliS_filt(iVox,nanInd)', PE_all{iSub}(nanInd)', DV_all{iSub}(nanInd)'); 
-                pvalMat.pe_dv(iVox) = temp.p; 
-                [corrMat.dv_pe(iVox), temp] = partcorr(Nifti_AlliS_filt(iVox,nanInd)', DV_all{iSub}(nanInd)', PE_all{iSub}(nanInd)'); 
-                pvalMat.dv_pe(iVox) = temp.p; 
+                % [corrMat.pe_dv(iVox), temp] = partcorr(Nifti_AlliS_rep_filt(iVox,nanInd)', PE_all_mimic{iSub}(nanInd)', DV_all{iSub}(nanInd)'); 
+                % pvalMat.pe_dv(iVox) = temp.p; 
+                % [corrMat.dv_pe(iVox), temp] = partcorr(Nifti_AlliS_rep_filt(iVox,nanInd)', DV_all{iSub}(nanInd)', PE_all_mimic{iSub}(nanInd)'); 
+                % pvalMat.dv_pe(iVox) = temp.p; 
+                
+                % Diff
+                tempv = diff(Nifti_AlliS_rep_filt(iVox,:)); 
+                [corrMat.diff_pe(iVox), pvalMat.diff_pe(iVox)] = corr(tempv(nanInd_diff)', temp_pe(nanInd_diff)'); 
+                % [corrMat.diff_dv(iVox), pvalMat.diff_dv(iVox)] = corr(tempv(nanInd_diff)', temp_dv(nanInd_diff)'); 
+                [corrMat.diff_c(iVox), pvalMat.diff_c(iVox)] = corr(tempv(nanInd_diff)', temp_c(nanInd_diff)'); 
+            else
+                corrMat.pe(iVox) = nan; pvalMat.pe(iVox) = nan; 
+                % corrMat.dv(iVox) = nan; pvalMat.dv(iVox) = nan; 
+                corrMat.c(iVox) = nan; pvalMat.c(iVox) = nan; 
+                
+                corrMat.pe_c(iVox) = nan; pvalMat.pe_c(iVox) = nan; 
+                corrMat.c_pe(iVox) = nan; pvalMat.c_pe(iVox) = nan; 
+                % corrMat.pe_dv(iVox) = nan; pvalMat.pe_dv(iVox) = nan; 
+                % corrMat.dv_pe(iVox) = nan; pvalMat.dv_pe(iVox) = nan; 
+                
+                corrMat.diff_pe(iVox) = nan; pvalMat.diff_pe(iVox) = nan; 
+                % corrMat.diff_dv(iVox) = nan; pvalMat.diff_dv(iVox) = nan; 
+                corrMat.diff_c(iVox) = nan; pvalMat.diff_c(iVox) = nan; 
+                
             end
         end
-        save([code_loc '/data/wholebrain/corr_sub' num2str(iSub) '.mat'],'corrMat', 'pvalMat')
+        save([code_loc '/data/wholebrain/corr_replay_sub' num2str(iSub) '.mat'],'corrMat', 'pvalMat')
     end
 end
+asdf
 
 %% Find voxels satisfying criterions
 if runModules.criterion_filter == 1 
@@ -115,17 +184,109 @@ if runModules.criterion_filter == 1
     mat_pe = []; 
     mat_dv = []; 
     mat_c = []; 
+    pmat_pe_c = []; 
+    pmat_pe_dv = []; 
+    pmat_c_pe = []; 
+    diff_pe = []; 
+    
     for iSub = ValSub
         load([code_loc '/data/wholebrain/corr_sub' num2str(iSub) '.mat'],'corrMat', 'pvalMat')
         mat_pe = [mat_pe; corrMat.pe];
         mat_dv = [mat_dv; corrMat.dv];
         mat_c = [mat_c; corrMat.c];
+        
+        pmat_pe_c = [pmat_pe_c; corrMat.pe_c];
+        pmat_pe_dv = [pmat_pe_dv; corrMat.pe_dv];
+        pmat_c_pe = [pmat_c_pe; corrMat.c_pe];
+        diff_pe = [diff_pe; corrMat.diff_pe]; 
     end
     
     % Nifit-mapping & save files 
     nifti_mapping(mean(mat_pe.^2,1), crits, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_pe')
     nifti_mapping(mean(mat_dv.^2,1), crits, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_dv')
     nifti_mapping(mean(mat_c.^2,1), crits, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_c')
+    
+%     nifti_mapping(mean(mat_pe_c.^2,1), crits, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_pe_c')
+%     nifti_mapping(mean(mat_pe_dv.^2,1), crits, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_pe_dv')
+%     nifti_mapping(mean(mat_c_pe.^2,1), crits, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_c_pe')
+    
+    for iSub = ValSub
+        nifti_mapping(mat_pe(iSub,:).^2, crits, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural/individual', ['varmap_pe_sub' num2str(iSub)])
+    end
+    
+    % Relative information
+    nifti_mapping(mean(mat_pe.^2,1), (mean(mat_pe.^2,1) - mean(mat_c.^2,1))>0, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_pe-c')
+    nifti_mapping(mean(mat_pe.^2,1), (mean(mat_pe.^2,1) - mean(mat_dv.^2,1))>0, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_pe-dv')
+    nifti_mapping(mean(mat_pe.^2,1), (mean(mat_pe.^2,1) - mean(mat_dv.^2,1))>0 & (mean(mat_pe.^2,1) - mean(mat_c.^2,1))>0, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_pe_crit1')
+
+    nifti_mapping(mean(mat_pe.^2,1), (mean(mat_pe.^2,1) - mean(mat_c.^2,1))>0 & (mean(mat_pe.^2,1) > quantile(mean(mat_pe.^2,1),0.95)), ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_pe_crit1_cut1')
+    nifti_mapping(mean(mat_pe.^2,1), (mean(mat_pe.^2,1) - mean(mat_dv.^2,1))>0 & (mean(mat_pe.^2,1) - mean(mat_c.^2,1))>0 & (mean(mat_pe.^2,1) > quantile(mean(mat_pe.^2,1),0.95)), ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_pe_crit1_cut2')
+    
 end
 
 
+
+%% Step #1
+% correlated to expectation
+nifti_mapping(nanmean(mat_pe.^2,1), crits, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_pe')
+
+figure(100); clf; 
+SP = subplot(1,1,1); cla; hold on; 
+hist(nanmean(mat_pe.^2,1),40)
+[N,X] = hist(nanmean(mat_pe.^2,1),40); 
+Bh = bar(X,N,'facecolor',[0 0 0]+0.7);
+
+vv = quantile(mean(mat_pe.^2,1),0.95); 
+nifti_mapping(mean(mat_pe.^2,1), mean(mat_pe.^2,1)>vv, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_pe_crit')
+nifti_mapping(mean(mat_pe.^2,1), (mean(mat_pe.^2,1) - mean(mat_c.^2,1))>0 & mean(mat_pe.^2,1)>vv, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_pe-c_crit')
+
+nifti_mapping(mean(mat_pe.^2,1), mean(mat_pe.^2,1)>vv, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_pe_crit')
+nifti_mapping(mean(mat_pe.^2,1), (mean(mat_pe.^2,1) - mean(mat_dv.^2,1))>0 & mean(mat_pe.^2,1)>vv, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_pe-dv_crit')
+
+nifti_mapping(mean(mat_pe.^2,1), mean(mat_pe.^2,1)>vv, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_pe_crit')
+nifti_mapping(mean(mat_pe.^2,1), (mean(mat_pe.^2,1) - mean(mat_dv.^2,1))>0 & mean(mat_pe.^2,1)>vv, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'pmat_pe_c_crit')
+
+
+nifti_mapping(mean(diff_pe,1), crits, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'diffvar_pe_crit')
+
+% Invariant to current choice
+
+[x1, x2] = ttest(pmat_c_pe.*sign(mat_pe));
+
+nifti_mapping(mean(mat_pe.^2,1), (mean(mat_pe.^2,1) - mean(mat_c.^2,1))>0 & mean(mat_pe.^2,1)>vv, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_pe-c_crit')
+
+% Sign-matched part correlation (c - pe)
+nifti_mapping(mean(pmat_c_pe.*sign(mat_pe),1), (mean(mat_pe.^2,1) - mean(mat_c.^2,1))>0 & mean(mat_pe.^2,1)>vv & x1==0, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_pe-c_cv_crit')
+
+
+
+%% Step #2 Replay
+if runModules.criterion_filter == 1 
+    crits = ones(length(GrayCoord),1); 
+    mat_pe = []; 
+    mat_c = []; 
+    pmat_pe_c = []; 
+    pmat_c_pe = []; 
+    diff_pe = []; 
+    
+    for iSub = ValSub
+        load([code_loc '/data/wholebrain/corr_replay_sub' num2str(iSub) '.mat'],'corrMat', 'pvalMat')
+        mat_pe = [mat_pe; corrMat.pe];
+        mat_c = [mat_c; corrMat.c];
+        
+        pmat_pe_c = [pmat_pe_c; corrMat.pe_c];
+        pmat_c_pe = [pmat_c_pe; corrMat.c_pe];
+        diff_pe = [diff_pe; corrMat.diff_pe]; 
+    end
+    
+    % Nifit-mapping & save files 
+    nifti_mapping(nanmean(mat_pe.^2,1), crits, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_rep_pe')
+    nifti_mapping(mean(mat_c.^2,1), crits, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_rep_c')
+    
+    % Relative information
+    nifti_mapping(mean(mat_pe.^2,1), (mean(mat_pe.^2,1) - mean(mat_c.^2,1))>0, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_rep_pe-c')
+
+    vv = quantile(mean(mat_pe.^2,1),0.95); 
+    nifti_mapping(mean(mat_pe.^2,1), mean(mat_pe.^2,1)>vv, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_pe_crit')
+    nifti_mapping(mean(mat_pe.^2,1), (mean(mat_pe.^2,1) - mean(mat_c.^2,1))>0 & mean(mat_pe.^2,1)>vv, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_rep_pe-c_crit')
+end
