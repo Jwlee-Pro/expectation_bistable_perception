@@ -261,10 +261,8 @@ nifti_mapping(mean(pmat_c_pe.*sign(mat_pe),1), (mean(mat_pe.^2,1) - mean(mat_c.^
 nifti_mapping(mean(pmat_pe_c.*sign(mat_pe),1), crits, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_pe-c_cv_bb')
 
 % Difference between explained variance
-nifti_mapping(mean(mat_pe.^2,1) - mean(mat_c.^2,1), crits, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'difference_pe-c')
+nifti_mapping(mean(diff_pe,1), crits, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'diffvar_pe_crit')
 
-
-nifti_mapping(mean(mat_pe.^2,1), (mean(mat_pe.^2,1) - mean(mat_c.^2,1))>0 & mean(mat_pe.^2,1)>vv & x1==0  & tempx>0, ROI_Gray, GrayCoord, '/Volumes/ROOT/CSNL_temp/JWL/expectation_bistable_perception/data/neural', 'varmap_pe-c_crit_choice_insig')
 
 %% Step #2 Replay
 if runModules.criterion_filter == 1 
